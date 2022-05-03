@@ -2,6 +2,9 @@
 
 use Illuminate\Support\Facades\Route;
 
+use App\Http\Controllers\CurrencyConversionController;
+use App\Http\Controllers\TransactionController;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -13,6 +16,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::redirect('/', '/most-conversion');
+Route::get('/most-conversion', [CurrencyConversionController::class, 'mostConversion'])->name('mostConversion');
+Route::get('/user-transaction-info', [TransactionController::class, 'userTransactionInfo'])->name('userTransactionInfo');
+Route::get('/transaction-history', [TransactionController::class, 'transactionHistory'])->name('transactionHistory');
