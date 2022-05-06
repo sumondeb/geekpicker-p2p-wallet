@@ -30,26 +30,36 @@
                                     </div>
                                     <div class="row">
                                         <div class="col-12 col-md-6 offset-md-3">
+                                            @if(!empty($mostConversion))
                                             <table class="table table-bordered">
                                                 <tbody>
                                                     <tr>
                                                         <td style="width:200px;">Name</td>
-                                                        <td>Sumon Deb</td>
+                                                        <td>{{$mostConversionUser->name}}</td>
                                                     </tr>
                                                     <tr>
                                                         <td>Email</td>
-                                                        <td>sumondeb5@gmail.com</td>
+                                                        <td>{{$mostConversionUser->email}}</td>
                                                     </tr>
                                                     <tr>
                                                         <td>Current Wallet</td>
-                                                        <td>500.00 USD</td>
+                                                        <td>{{number_format($mostConversionUser->wallet, 2) . ' ' . $mostConversionUser->currency}}</td>
                                                     </tr>
                                                     <tr>
                                                         <td>Number of Conversion</td>
-                                                        <td>20</td>
+                                                        <td>{{$mostConversion->conversionQuantity}}</td>
                                                     </tr>
                                                 </tbody>
                                             </table>
+                                            @else
+                                            <table class="table table-bordered">
+                                                <tbody>
+                                                    <tr>
+                                                        <td class="text-center">No data found</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                            @endif
                                         </div>
                                     </div>
                                 </div>

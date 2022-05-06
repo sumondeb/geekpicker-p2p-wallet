@@ -20,58 +20,68 @@
                                         <h3 class="text-center">Transaction info for a particular user</h3>
                                     </div>
                                     <hr>
-                                    <form action="#" method="post" novalidate="novalidate">
-                                        <div class="row">
-                                            <div class="col-12 col-md-6 offset-md-3">
+                                    <div class="row">
+                                        <div class="col-12 col-md-6 offset-md-3">
+                                            <form action="{{route('userTransactionInfo')}}" method="get" novalidate="novalidate">
                                                 <div class="row form-group">
                                                     <div class="col-9" style="padding-right: 0;">
-                                                        <select name="select" id="select" class="form-control">
-                                                            <option value="0">Please select</option>
-                                                            <option value="1">Option #1</option>
-                                                            <option value="2">Option #2</option>
-                                                            <option value="3">Option #3</option>
+                                                        <select name="user" id="user" class="form-control">
+                                                            <option value="">Please select user</option>
+                                                            @foreach($allUsers as $userData)
+                                                            <option @if($userData->id==$user_id){{'selected=selected'}}@endif value="{{$userData->id}}">{{$userData->name}}</option>
+                                                            @endforeach
                                                         </select>
                                                     </div>
                                                     <div class="col-3">
-                                                        <button type="button" class="btn btn-info pull-right" style="width:100%;"><i class="fa fa-search"></i>&nbsp; Search</button>
+                                                        <button type="submit" class="btn btn-info pull-right" style="width:100%;"><i class="fa fa-search"></i>&nbsp; Search</button>
                                                     </div>
                                                 </div>
+                                            </form>
 
-                                                <table class="table table-bordered">
-                                                    <tbody>
-                                                        <tr>
-                                                            <td style="width:300px;">Name</td>
-                                                            <td>Sumon Deb</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td>Email</td>
-                                                            <td>sumondeb5@gmail.com</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td>Current Wallet</td>
-                                                            <td>500.00 USD</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td>Converted Amount by Sending</td>
-                                                            <td>500.00 USD</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td>Converted Amount by Receiving</td>
-                                                            <td>500.00 USD</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td>Total Converted Amount</td>
-                                                            <td>500.00 USD</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td>Third Highest Transaction Amount</td>
-                                                            <td>500.00 USD</td>
-                                                        </tr>
-                                                    </tbody>
-                                                </table>
-                                            </div>
+                                            @if(!empty($userInfo))
+                                            <table class="table table-bordered">
+                                                <tbody>
+                                                    <tr>
+                                                        <td style="width:300px;">Name</td>
+                                                        <td>{{$userInfo->name}}</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>Email</td>
+                                                        <td>{{$userInfo->email}}</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>Current Wallet</td>
+                                                        <td>{{number_format($userInfo->wallet, 2) . ' ' . $userInfo->currency}}</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>Converted Amount by Sending</td>
+                                                        <td>{{number_format($sendingConvertedAmount, 2) . ' ' . $userInfo->currency}}</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>Converted Amount by Receiving</td>
+                                                        <td>{{number_format($receivingConvertedAmount, 2) . ' ' . $userInfo->currency}}</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>Total Converted Amount</td>
+                                                        <td>{{number_format(($sendingConvertedAmount+$receivingConvertedAmount), 2) . ' ' . $userInfo->currency}}</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>Third Highest Transaction Amount</td>
+                                                        <td>{{!empty($thirdHighestTransaction) ? number_format($thirdHighestTransaction[0]->transactionAmount, 2) . ' ' . $userInfo->currency : 'Third transaction not found'}}</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                            @else
+                                            <table class="table table-bordered">
+                                                <tbody>
+                                                    <tr>
+                                                        <td class="text-center">Select a particular user</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                            @endif
                                         </div>
-                                    </form>
+                                    </div>
                                 </div>
                             </div>
 
