@@ -3,10 +3,9 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\API\BaseController;
+use App\Http\Requests\LoginRequest;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use App\Interfaces\UserRepositoryInterface;
-use Validator;
 
 class UserController extends BaseController 
 {
@@ -17,18 +16,8 @@ class UserController extends BaseController
         $this->userRepository = $userRepository;
     }
 
-    public function login(Request $request): JsonResponse
+    public function login(LoginRequest $request): JsonResponse
     {
-        /* Validation */
-        $validator = Validator::make($request->all(), [
-            'email' => 'required|email',
-            'password' => 'required|string|min:6',
-        ]);
-        if ($validator->fails()) {
-            return $this->validationError($validator->errors());
-        }
-
-        /* Login */
         $userData = $request->only(['email', 'password']);
 
         if ($this->userRepository->login($userData)) {

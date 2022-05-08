@@ -12,14 +12,9 @@ class ApiUserControllerTest extends TestCase
     public function test_login_validation()
     {
         $this->json('POST', 'api/login')
-            ->assertStatus(422)
-            ->assertJson([
-                "success" => false,
-                "message" => "Validation Error",
-                "data" => [
-                    'email' => ["The email field is required."],
-                    'password' => ["The password field is required."],
-                ]
+            ->assertInvalid([
+                'email' => 'The email field is required.',
+                'password' => 'The password field is required.',
             ]);
     }
 

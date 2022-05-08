@@ -8,10 +8,10 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use App\Http\Requests\SendMoneyRequest;
 use App\Interfaces\TransactionRepositoryInterface;
 use App\Interfaces\CurrencyConversionRepositoryInterface;
 use App\Interfaces\UserRepositoryInterface;
-use Validator;
 use Log;
 
 class TransactionController extends BaseController 
@@ -30,19 +30,8 @@ class TransactionController extends BaseController
         $this->userRepository = $userRepository;
     }
 
-    public function sendMoney(Request $request): JsonResponse
+    public function sendMoney(SendMoneyRequest $request): JsonResponse
     {
-        /* Validation start */
-        $validator = Validator::make($request->all(), [
-            'receiver_id' => 'required|integer',
-            'amount' => 'required|numeric|gt:0',
-        ]);
-        if ($validator->fails()) {
-            return $this->validationError($validator->errors());
-        }
-        /* Validation end */
-
-        /* Send Money start */
         $receiverId = $request->receiver_id;
         $sendingAmount = $request->amount;
 
@@ -133,7 +122,6 @@ class TransactionController extends BaseController
                 return $this->errorResponse($e->getMessage());
             }
         }
-        /* Send Money end */
     }
 
     public function userTransactionInfo(): JsonResponse

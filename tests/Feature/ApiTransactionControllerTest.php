@@ -21,28 +21,18 @@ class ApiTransactionControllerTest extends TestCase
         $this->actingAs($user, 'api');
 
         $this->json('POST', 'api/send-money')
-            ->assertStatus(422)
-            ->assertJson([
-                "success" => false,
-                "message" => "Validation Error",
-                "data" => [
-                    'receiver_id' => ["The receiver id field is required."],
-                    'amount' => ["The amount field is required."],
-                ]
+            ->assertInvalid([
+                'receiver_id' => ["The receiver id field is required."],
+                'amount' => ["The amount field is required."],
             ]);
 
         $this->json('POST', 'api/send-money', ['receiver_id' => 'abc', 'amount' => 'xyz'])
-            ->assertStatus(422)
-            ->assertJson([
-                "success" => false,
-                "message" => "Validation Error",
-                "data" => [
-                    'receiver_id' => ["The receiver id must be an integer."],
-                    'amount' => [
-                        "The amount must be a number.",
-                        "The amount must be greater than 0.",
-                    ],
-                ]
+            ->assertInvalid([
+                'receiver_id' => ["The receiver id must be an integer."],
+                'amount' => [
+                    "The amount must be a number.",
+                    "The amount must be greater than 0.",
+                ],
             ]);
     }
 
