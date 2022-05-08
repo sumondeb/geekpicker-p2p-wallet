@@ -55,19 +55,19 @@
                                                     </tr>
                                                     <tr>
                                                         <td>Converted Amount by Sending</td>
-                                                        <td>{{number_format($sendingConvertedAmount, 2) . ' ' . $userInfo->currency}}</td>
+                                                        <td id="sendingConvertedAmount">{{number_format($sendingConvertedAmount, 2) . ' ' . $userInfo->currency}}</td>
                                                     </tr>
                                                     <tr>
                                                         <td>Converted Amount by Receiving</td>
-                                                        <td>{{number_format($receivingConvertedAmount, 2) . ' ' . $userInfo->currency}}</td>
+                                                        <td id="receivingConvertedAmount">{{number_format($receivingConvertedAmount, 2) . ' ' . $userInfo->currency}}</td>
                                                     </tr>
                                                     <tr>
                                                         <td>Total Converted Amount</td>
-                                                        <td>{{number_format(($sendingConvertedAmount+$receivingConvertedAmount), 2) . ' ' . $userInfo->currency}}</td>
+                                                        <td id="totalConvertedAmount">{{number_format(($sendingConvertedAmount+$receivingConvertedAmount), 2) . ' ' . $userInfo->currency}}</td>
                                                     </tr>
                                                     <tr>
                                                         <td>Third Highest Transaction Amount</td>
-                                                        <td>{{!empty($thirdHighestTransaction) ? number_format($thirdHighestTransaction[0]->transactionAmount, 2) . ' ' . $userInfo->currency : 'Third transaction not found'}}</td>
+                                                        <td id="thirdHighestTransaction">{{!empty($thirdHighestTransaction) ? number_format($thirdHighestTransaction[0]->transactionAmount, 2) . ' ' . $userInfo->currency : 'Third transaction not found'}}</td>
                                                     </tr>
                                                 </tbody>
                                             </table>
