@@ -68,7 +68,16 @@ class TransactionController extends BaseController
                     $currencyConversion = $this->currencyConversionRepository->getCurrencyConversionData($sender->currency, $receiver->currency, $sendingAmount);
                     
                     if ($currencyConversion->successful()) {
-                        $receivingAmount = $currencyConversion->object()->result;
+                        $currencyConversionObj = $currencyConversion->object();
+                        if($currencyConversionObj->success) {
+                            $receivingAmount = $currencyConversionObj->result;
+                        } else {
+                            $error = $currencyConversionObj->error;
+                            $logData['error'] = $error->info;
+                            Log::error('User transaction failed', $logData);
+
+                            return $this->errorResponse($error->info, [], $error->code);
+                        }
                     } else {
                         $error = $currencyConversion->clientError() ? $currencyConversion->object()->message : 'Currency conversion server not connected';
                         $logData['error'] = $error;

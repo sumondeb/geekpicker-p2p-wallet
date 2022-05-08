@@ -92,7 +92,7 @@ class WebTransactionControllerTest extends TestCase
         $response = $this->get('/transaction-history');
         $response->assertSee($user1->name)
             ->assertSee($user2->name)
-            ->assertSee($transaction->sending_amount . ' ' . $transaction->sender_currency)
-            ->assertSee($transaction->receiving_amount . ' ' . $transaction->receiver_currency);
+            ->assertSee(number_format($transaction->sending_amount, 2) . ' ' . $transaction->sender_currency)
+            ->assertSee(number_format($transaction->receiving_amount, 2) . ' ' . $transaction->receiver_currency);
     }
 }
