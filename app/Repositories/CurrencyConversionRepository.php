@@ -28,7 +28,7 @@ class CurrencyConversionRepository implements CurrencyConversionInterface
         ]);
     }
 
-    public function getMostConversion(): Transaction
+    public function getMostConversion(): Transaction|null
     {
         return Transaction::select('sender_user_id', DB::raw('count(id) as conversionQuantity'))
             ->whereRaw('sender_currency != receiver_currency')

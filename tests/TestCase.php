@@ -9,12 +9,16 @@ use Illuminate\Testing\TestResponse;
 use Symfony\Component\CssSelector\CssSelectorConverter;
 use Illuminate\Support\Str;
 use Illuminate\Testing\Assert as PHPUnit;
-
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
+
+use Illuminate\Foundation\Testing\WithoutMiddleware;
+use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 
 abstract class TestCase extends BaseTestCase
 {
     use CreatesApplication;
+    use DatabaseTransactions;
 
     public function setUp(): void
     {
