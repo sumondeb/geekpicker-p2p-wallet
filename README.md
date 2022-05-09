@@ -15,9 +15,9 @@ The task is developed by Laravel. Laravel Repository Pattern is used for develop
 
 #### Restfull API list
 - POST login (Parameters: email, password)
-- Authenticated APIs:
--- GET user-profile
--- GET user-transaction-info
--- GET user-transaction-history
--- POST send-money (Parameters: receiver_id, amount)
--- POST logout
+###### Authenticated APIs:
+- GET user-profile
+- GET user-transaction-info
+- GET user-transaction-history
+- POST send-money (Parameters: receiver_id, amount)
+- POST logout
