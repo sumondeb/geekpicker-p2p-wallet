@@ -8,12 +8,12 @@ The task is developed by Laravel. Laravel Repository Pattern is used for develop
 
 The task features:
 
-#### Web interface
+##### Web interface
 - Most Conversion
 - Transaction info for a particular user
 - All Transaction History
 
-#### Restfull API list
+##### Restfull API list
 - POST login (Parameters: email, password)
 - Authenticated APIs:
   - GET user-profile
