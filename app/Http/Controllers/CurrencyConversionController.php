@@ -4,17 +4,17 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\View\View;
-use App\Interfaces\CurrencyConversionRepositoryInterface;
-use App\Interfaces\UserRepositoryInterface;
+use App\Interfaces\CurrencyConversionInterface;
+use App\Interfaces\UserInterface;
 
 class CurrencyConversionController extends Controller 
 {
-    private CurrencyConversionRepositoryInterface $currencyConversionRepository;
-    private UserRepositoryInterface $userRepository;
+    private CurrencyConversionInterface $currencyConversionRepository;
+    private UserInterface $userRepository;
 
     public function __construct(
-        CurrencyConversionRepositoryInterface $currencyConversionRepository,
-        UserRepositoryInterface $userRepository
+        CurrencyConversionInterface $currencyConversionRepository,
+        UserInterface $userRepository
     ) {
         $this->currencyConversionRepository = $currencyConversionRepository;
         $this->userRepository = $userRepository;

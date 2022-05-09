@@ -3,9 +3,9 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
-use App\Interfaces\UserRepositoryInterface;
-use App\Interfaces\TransactionRepositoryInterface;
-use App\Interfaces\CurrencyConversionRepositoryInterface;
+use App\Interfaces\UserInterface;
+use App\Interfaces\TransactionInterface;
+use App\Interfaces\CurrencyConversionInterface;
 use App\Repositories\UserRepository;
 use App\Repositories\TransactionRepository;
 use App\Repositories\CurrencyConversionRepository;
@@ -19,9 +19,9 @@ class RepositoryServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->app->bind(UserRepositoryInterface::class, UserRepository::class);
-        $this->app->bind(TransactionRepositoryInterface::class, TransactionRepository::class);
-        $this->app->bind(CurrencyConversionRepositoryInterface::class, CurrencyConversionRepository::class);
+        $this->app->bind(UserInterface::class, UserRepository::class);
+        $this->app->bind(TransactionInterface::class, TransactionRepository::class);
+        $this->app->bind(CurrencyConversionInterface::class, CurrencyConversionRepository::class);
     }
 
     /**

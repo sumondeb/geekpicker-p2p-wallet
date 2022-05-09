@@ -5,20 +5,20 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
-use App\Interfaces\TransactionRepositoryInterface;
-use App\Interfaces\CurrencyConversionRepositoryInterface;
-use App\Interfaces\UserRepositoryInterface;
+use App\Interfaces\TransactionInterface;
+use App\Interfaces\CurrencyConversionInterface;
+use App\Interfaces\UserInterface;
 
 class TransactionController extends Controller 
 {
-    private TransactionRepositoryInterface $transactionRepository;
-    private CurrencyConversionRepositoryInterface $currencyConversionRepository;
-    private UserRepositoryInterface $userRepository;
+    private TransactionInterface $transactionRepository;
+    private CurrencyConversionInterface $currencyConversionRepository;
+    private UserInterface $userRepository;
 
     public function __construct(
-        TransactionRepositoryInterface $transactionRepository,
-        CurrencyConversionRepositoryInterface $currencyConversionRepository,
-        UserRepositoryInterface $userRepository
+        TransactionInterface $transactionRepository,
+        CurrencyConversionInterface $currencyConversionRepository,
+        UserInterface $userRepository
     ) {
         $this->transactionRepository = $transactionRepository;
         $this->currencyConversionRepository = $currencyConversionRepository;

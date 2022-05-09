@@ -2,35 +2,38 @@
 
 namespace App\Http\Controllers\API;
 
-use App\Http\Controllers\API\BaseController;
+use App\Http\Controllers\Controller;
 use App\Mail\MoneyReceived;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Response;
 use Illuminate\Http\Request;
 use App\Http\Requests\SendMoneyRequest;
-use App\Interfaces\TransactionRepositoryInterface;
-use App\Interfaces\CurrencyConversionRepositoryInterface;
-use App\Interfaces\UserRepositoryInterface;
+use App\Http\Resources\TransactionResource;
+use App\Http\Resources\UserResource;
+use App\Interfaces\TransactionInterface;
+use App\Interfaces\CurrencyConversionInterface;
+use App\Interfaces\UserInterface;
 use Log;
 
-class TransactionController extends BaseController 
+class TransactionController extends Controller 
 {
-    private TransactionRepositoryInterface $transactionRepository;
-    private CurrencyConversionRepositoryInterface $currencyConversionRepository;
-    private UserRepositoryInterface $userRepository;
+    private TransactionInterface $transactionRepository;
+    private CurrencyConversionInterface $currencyConversionRepository;
+    private UserInterface $userRepository;
 
     public function __construct(
-        TransactionRepositoryInterface $transactionRepository,
-        CurrencyConversionRepositoryInterface $currencyConversionRepository,
-        UserRepositoryInterface $userRepository
+        TransactionInterface $transactionRepository,
+        CurrencyConversionInterface $currencyConversionRepository,
+        UserInterface $userRepository
     ) {
         $this->transactionRepository = $transactionRepository;
         $this->currencyConversionRepository = $currencyConversionRepository;
         $this->userRepository = $userRepository;
     }
 
-    public function sendMoney(SendMoneyRequest $request): JsonResponse
+    public function sendMoney(SendMoneyRequest $request): TransactionResource|JsonResponse
     {
         $receiverId = $request->receiver_id;
         $sendingAmount = $request->amount;
@@ -39,15 +42,11 @@ class TransactionController extends BaseController
         $receiver = $this->userRepository->getUserById($receiverId);
 
         if ($sender->id == $receiver->id) {
-            return $this->errorResponse('You can not send the money to your own wallet');
+            return response()->json(['message' => 'You can not send the money to your own wallet'], Response::HTTP_UNPROCESSABLE_ENTITY);
         } else if ($sender->wallet < $sendingAmount) {
-            return $this->errorResponse('Insufficient wallet balance');
+            return response()->json(['message' => 'Insufficient wallet balance'], Response::HTTP_UNPROCESSABLE_ENTITY);
         } else {
-            $logData = [
-                'sender_id' => $sender->id,
-                'receiver_id' => $receiver->id,
-                'amount' => $sendingAmount,
-            ];
+            $logData = ['sender_id' => $sender->id, 'receiver_id' => $receiver->id, 'amount' => $sendingAmount];
 
             try {
                 Log::info('User attempt to send money', $logData);
@@ -61,18 +60,11 @@ class TransactionController extends BaseController
                         if($currencyConversionObj->success) {
                             $receivingAmount = $currencyConversionObj->result;
                         } else {
-                            $error = $currencyConversionObj->error;
-                            $logData['error'] = $error->info;
-                            Log::error('User transaction failed', $logData);
-
-                            return $this->errorResponse($error->info, [], $error->code);
+                            return $this->transactionRepository->sendMoneyErrorResponse($currencyConversionObj->error->info, $currencyConversionObj->error->code, $logData);
                         }
                     } else {
                         $error = $currencyConversion->clientError() ? $currencyConversion->object()->message : 'Currency conversion server not connected';
-                        $logData['error'] = $error;
-                        Log::error('User transaction failed', $logData);
-
-                        return $this->errorResponse($error, [], $currencyConversion->status());
+                        return $this->transactionRepository->sendMoneyErrorResponse($error, $currencyConversion->status(), $logData);
                     }
                 } else {
                     $receivingAmount = $sendingAmount;
@@ -104,27 +96,19 @@ class TransactionController extends BaseController
                     /* Mail end */
 
                     Log::info('User transaction successfully done', $data->toArray());
-
-                    return $this->successResponse('Send money successfully done', $data);
+                    return new TransactionResource($data);
                 } catch (\Exception $e) {
                     DB::rollback();
-
-                    $logData['error'] = $e->getMessage();
-                    Log::error('User transaction failed', $logData);
-
-                    return $this->errorResponse($e->getMessage());
+                    return $this->transactionRepository->sendMoneyErrorResponse($e->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR, $logData);
                 }
                 /* Transaction end */
             } catch (\Exception $e) {
-                $logData['error'] = $e->getMessage();
-                Log::error('User transaction failed', $logData);
-
-                return $this->errorResponse($e->getMessage());
+                return $this->transactionRepository->sendMoneyErrorResponse($e->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR, $logData);
             }
         }
     }
 
-    public function userTransactionInfo(): JsonResponse
+    public function userTransactionInfo(): UserResource
     {
         $user = $this->userRepository->getAuthUser();
 
@@ -132,19 +116,15 @@ class TransactionController extends BaseController
         $receivingConvertedAmount = $this->currencyConversionRepository->getTotalReceivingAmountByUserId($user->id);
         $thirdHighestTransaction = $this->transactionRepository->getThirdHighestTransactionByUserId($user->id);
 
-        return $this->successResponse('User Transaction Info', [
-            'name' => $user->name,
-            'email' => $user->email,
-            'currency' => $user->currency,
-            'current_wallet' => $user->wallet,
-            'converted_amount_by_sending' => $sendingConvertedAmount,
-            'converted_amount_by_receiving' => $receivingConvertedAmount,
-            'total_converted_amount' => $sendingConvertedAmount+$receivingConvertedAmount,
-            'third_highest_transaction_amount' => !empty($thirdHighestTransaction) ? $thirdHighestTransaction[0]->transactionAmount : 0,
-        ]);
+        $user->converted_amount_by_sending = $sendingConvertedAmount;
+        $user->converted_amount_by_receiving = $receivingConvertedAmount;
+        $user->total_converted_amount = $sendingConvertedAmount+$receivingConvertedAmount;
+        $user->third_highest_transaction_amount = !empty($thirdHighestTransaction) ? $thirdHighestTransaction[0]->transactionAmount : 0;
+
+        return new UserResource($user);
     }
 
-    public function userTransactionHistory(Request $request): JsonResponse
+    public function userTransactionHistory(Request $request): TransactionResource
     {
         $page = $request->page;
         $perPage = ($request->per_page>0) ? $request->per_page : 10;
@@ -152,6 +132,6 @@ class TransactionController extends BaseController
 
         $transactionHistory = $this->transactionRepository->getTransactionHistory($perPage, $user->id);
 
-        return $this->successResponse('User Transaction History', $transactionHistory);
+        return new TransactionResource($transactionHistory);
     }
 }

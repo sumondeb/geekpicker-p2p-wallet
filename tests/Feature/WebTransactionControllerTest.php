@@ -12,7 +12,9 @@ class WebTransactionControllerTest extends TestCase
 {
     public function test_user_transaction_info_no_user_select_no_data()
     {
-        $this->get('/user-transaction-info')->assertSee('Select a particular user');
+        $this->get('/user-transaction-info')
+            ->assertOk()
+            ->assertSee('Select a particular user');
     }
 
     public function test_user_transaction_info_return_valid_result()
@@ -71,7 +73,8 @@ class WebTransactionControllerTest extends TestCase
         $thirdHighestTransaction = 30;
 
         $response = $this->get("/user-transaction-info?user=$user1->id");
-        $response->assertSelectorContains('td#sendingConvertedAmount', number_format($sendingConvertedAmount, 2) . ' ' . $user1->currency)
+        $response->assertOk()
+            ->assertSelectorContains('td#sendingConvertedAmount', number_format($sendingConvertedAmount, 2) . ' ' . $user1->currency)
             ->assertSelectorContains('td#receivingConvertedAmount', number_format($receivingConvertedAmount, 2) . ' ' . $user1->currency)
             ->assertSelectorContains('td#totalConvertedAmount', number_format(($sendingConvertedAmount+$receivingConvertedAmount), 2) . ' ' . $user1->currency)
             ->assertSelectorContains('td#thirdHighestTransaction', number_format($thirdHighestTransaction, 2) . ' ' . $user1->currency);
@@ -90,7 +93,8 @@ class WebTransactionControllerTest extends TestCase
         ]);
 
         $response = $this->get('/transaction-history');
-        $response->assertSee($user1->name)
+        $response->assertOk()
+            ->assertSee($user1->name)
             ->assertSee($user2->name)
             ->assertSee(number_format($transaction->sending_amount, 2) . ' ' . $transaction->sender_currency)
             ->assertSee(number_format($transaction->receiving_amount, 2) . ' ' . $transaction->receiver_currency);

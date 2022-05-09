@@ -2,49 +2,47 @@
 
 namespace App\Http\Controllers\API;
 
-use App\Http\Controllers\API\BaseController;
+use App\Http\Controllers\Controller;
 use App\Http\Requests\LoginRequest;
+use App\Http\Resources\UserResource;
 use Illuminate\Http\JsonResponse;
-use App\Interfaces\UserRepositoryInterface;
+use Illuminate\Http\Response;
+use App\Interfaces\UserInterface;
 
-class UserController extends BaseController 
+class UserController extends Controller 
 {
-    private UserRepositoryInterface $userRepository;
+    private UserInterface $userRepository;
 
-    public function __construct(UserRepositoryInterface $userRepository) 
+    public function __construct(UserInterface $userRepository) 
     {
         $this->userRepository = $userRepository;
     }
 
-    public function login(LoginRequest $request): JsonResponse
+    public function login(LoginRequest $request): UserResource|JsonResponse
     {
         $userData = $request->only(['email', 'password']);
 
         if ($this->userRepository->login($userData)) {
             $user = auth()->user();
-            $responseData = [
-                'name' => $user->name,
-                'email' => $user->email,
-                'token' => $user->createToken('P2P-Wallet')->accessToken,
-            ];
+            $user->token = $user->createToken('P2P-Wallet')->accessToken;
 
-            return $this->successResponse('User login successfully', $responseData);
+            return new UserResource($user);
         } else {
-            return $this->errorResponse('Invalid email or password', ['error'=>'Unauthorised'], 401);
+            return response()->json(['message' => 'Invalid email or password'], Response::HTTP_UNAUTHORIZED);
         }
     }
 
-    public function userProfile(): JsonResponse
+    public function userProfile(): UserResource|JsonResponse
     {
         $user = $this->userRepository->getAuthUser();
 
-        return $this->successResponse('User Profile', $user->toArray());
+        return new UserResource($user);
     }
 
     public function logout(): JsonResponse
     {
         $this->userRepository->logoutApi();
 
-        return $this->successResponse('User logged out');
+        return response()->json(null, Response::HTTP_NO_CONTENT);
     }
 }

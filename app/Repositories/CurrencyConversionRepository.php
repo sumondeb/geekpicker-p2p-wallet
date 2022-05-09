@@ -2,12 +2,13 @@
 
 namespace App\Repositories;
 
-use App\Interfaces\CurrencyConversionRepositoryInterface;
+use App\Interfaces\CurrencyConversionInterface;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Http\Client\Response AS HttpClientResponse;
 use App\Models\Transaction;
 
-class CurrencyConversionRepository implements CurrencyConversionRepositoryInterface
+class CurrencyConversionRepository implements CurrencyConversionInterface
 {
     private string $apikey;
 
@@ -16,7 +17,7 @@ class CurrencyConversionRepository implements CurrencyConversionRepositoryInterf
         $this->apikey = is_null(env('CURRENCY_CONVERSION_API_KEY')) ? '' : env('CURRENCY_CONVERSION_API_KEY');
     }
 
-    public function getCurrencyConversionData(string $fromCurrency, string $toCurrency, float $amount)
+    public function getCurrencyConversionData(string $fromCurrency, string $toCurrency, float $amount): HttpClientResponse
     {
         return Http::accept('application/json')
         ->withHeaders(['apikey' => $this->apikey])
@@ -27,7 +28,7 @@ class CurrencyConversionRepository implements CurrencyConversionRepositoryInterf
         ]);
     }
 
-    public function getMostConversion()
+    public function getMostConversion(): Transaction
     {
         return Transaction::select('sender_user_id', DB::raw('count(id) as conversionQuantity'))
             ->whereRaw('sender_currency != receiver_currency')
@@ -36,14 +37,14 @@ class CurrencyConversionRepository implements CurrencyConversionRepositoryInterf
             ->first();
     }
 
-    public function getTotalSendingAmountByUserId(int $userId)
+    public function getTotalSendingAmountByUserId(int $userId): float
     {
         return Transaction::whereRaw('sender_currency != receiver_currency')
             ->where('sender_user_id', $userId)
             ->sum('sending_amount');
     }
 
-    public function getTotalReceivingAmountByUserId(int $userId)
+    public function getTotalReceivingAmountByUserId(int $userId): float
     {
         return Transaction::whereRaw('sender_currency != receiver_currency')
             ->where('receiver_user_id', $userId)

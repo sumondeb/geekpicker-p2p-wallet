@@ -2,10 +2,11 @@
 
 namespace App\Repositories;
 
-use App\Interfaces\UserRepositoryInterface;
+use App\Interfaces\UserInterface;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Collection;
 
-class UserRepository implements UserRepositoryInterface
+class UserRepository implements UserInterface
 {
     public function login(array $userData): bool
     {
@@ -17,22 +18,22 @@ class UserRepository implements UserRepositoryInterface
         auth()->user()->token()->revoke();
     }
 
-    public function getAuthUser()
+    public function getAuthUser(): User
     {
         return auth()->user();
     }
 
-    public function getUserById(int $userId)
+    public function getUserById(int $userId): User
     {
         return User::findOrFail($userId);
     }
 
-    public function getAllUsers()
+    public function getAllUsers(): Collection
     {
         return User::all();
     }
 
-    public function updateUser(int $userId, array $newDetails)
+    public function updateUser(int $userId, array $newDetails): int
     {
         return User::whereId($userId)->update($newDetails);
     }

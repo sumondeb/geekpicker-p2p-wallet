@@ -30,7 +30,7 @@
                                             </thead>
                                             <tbody>
                                                 @php $trRole = ''; @endphp
-                                                @foreach($transactionHistory as $transaction)
+                                                @forelse($transactionHistory as $transaction)
                                                 <tr role="row" class="{{$trRole = $trRole=='odd' ? 'even' : 'odd'}}">
                                                     <td class="text-center">{{$sl++}}</td>
                                                     <td class="text-center">{{(new DateTime($transaction->transaction_at))->format('d/m/Y H:i:s')}}</td>
@@ -39,7 +39,11 @@
                                                     <td>{{$transaction->receiverName}}</td>
                                                     <td class="text-center">{{number_format($transaction->receiving_amount, 2) . ' ' . $transaction->receiver_currency}}</td>
                                                 </tr>
-                                                @endforeach
+                                                @empty
+                                                <tr role="row">
+                                                    <td class="text-center" colspan="6">No data found</td>
+                                                </tr>
+                                                @endforelse
                                             </tbody>
                                         </table>
 

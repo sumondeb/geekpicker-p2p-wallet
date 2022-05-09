@@ -18,6 +18,8 @@ class WebCurrencyConversionControllerTest extends TestCase
             ->orderBy('conversionQuantity', 'desc')
             ->first();
 
-        $this->get('/most-conversion')->assertSee($expectData ? $expectData->conversionQuantity : 'No data');
+        $this->get('/most-conversion')
+            ->assertOk()
+            ->assertSee($expectData ? $expectData->conversionQuantity : 'No data');
     }
 }

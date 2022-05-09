@@ -2,18 +2,21 @@
 
 namespace App\Repositories;
 
-use App\Interfaces\TransactionRepositoryInterface;
+use App\Interfaces\TransactionInterface;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Pagination\LengthAwarePaginator AS paginateResponse;
 use App\Models\Transaction;
+use Log;
 
-class TransactionRepository implements TransactionRepositoryInterface
+class TransactionRepository implements TransactionInterface
 {
-    public function createTransaction(array $transactionDetails)
+    public function createTransaction(array $transactionDetails): Transaction
     {
         return Transaction::create($transactionDetails);
     }
 
-    public function getThirdHighestTransactionByUserId(int $userId)
+    public function getThirdHighestTransactionByUserId(int $userId): array
     {
         $sql = "SELECT transactionAmount FROM ";
         $sql .= "(SELECT `sending_amount` AS transactionAmount FROM `transactions` WHERE `sender_user_id`=$userId ";
@@ -24,7 +27,7 @@ class TransactionRepository implements TransactionRepositoryInterface
         return DB::select($sql);
     }
 
-    public function getTransactionHistory(int $perPage, int $userId=0)
+    public function getTransactionHistory(int $perPage, int $userId=0): paginateResponse
     {
         $data = Transaction::select('transactions.*', DB::raw('senderUsers.name as senderName, receiverUsers.name as receiverName'))
             ->join(DB::raw('users senderUsers'), 'transactions.sender_user_id', '=', 'senderUsers.id')
@@ -36,5 +39,13 @@ class TransactionRepository implements TransactionRepositoryInterface
             });
         }
         return $data->orderBy('id', 'desc')->paginate($perPage);
+    }
+
+    public function sendMoneyErrorResponse(string $message, int $statusCode, array $logData): JsonResponse
+    {
+        $logData['error'] = $message;
+        Log::error('User transaction failed', $logData);
+
+        return response()->json(['message' => $message], $statusCode);
     }
 }

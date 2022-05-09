@@ -10,9 +10,9 @@ use Tests\TestCase;
 
 class ApiTransactionControllerTest extends TestCase
 {
-    public function test_send_money_must_be_for_authenticated_user()
+    public function test_send_money_must_be_for_authorized_user()
     {
-        $this->json('POST', 'api/send-money')->assertStatus(401);
+        $this->json('POST', 'api/send-money')->assertUnauthorized();
     }
 
     public function test_send_money_validation()
@@ -41,7 +41,7 @@ class ApiTransactionControllerTest extends TestCase
         $user = User::factory()->create();
         $this->actingAs($user, 'api');
 
-        $this->json('POST', 'api/send-money', ['receiver_id' => $user->id+1, 'amount' => 10])->assertStatus(404);
+        $this->json('POST', 'api/send-money', ['receiver_id' => $user->id+1, 'amount' => 10])->assertNotFound();
     }
 
     public function test_send_money_not_possible_to_own_wallet()
@@ -49,12 +49,7 @@ class ApiTransactionControllerTest extends TestCase
         $senderUser = User::factory()->create();
         $this->actingAs($senderUser, 'api');
 
-        $this->json('POST', 'api/send-money', ['receiver_id' => $senderUser->id, 'amount' => 10])
-            ->assertStatus(404)
-            ->assertJson([
-                "success" => false,
-                "message" => "You can not send the money to your own wallet",
-            ]);
+        $this->json('POST', 'api/send-money', ['receiver_id' => $senderUser->id, 'amount' => 10])->assertUnprocessable();
     }
 
     public function test_send_money_not_possible_for_insufficient_wallet_balance()
@@ -63,12 +58,7 @@ class ApiTransactionControllerTest extends TestCase
         $receiverUser = User::factory()->create();
         $this->actingAs($senderUser, 'api');
 
-        $this->json('POST', 'api/send-money', ['receiver_id' => $receiverUser->id, 'amount' => 11])
-            ->assertStatus(404)
-            ->assertJson([
-                "success" => false,
-                "message" => "Insufficient wallet balance",
-            ]);
+        $this->json('POST', 'api/send-money', ['receiver_id' => $receiverUser->id, 'amount' => 11])->assertUnprocessable();
     }
 
     public function test_send_money_currency_conversion_client_error_response()
@@ -77,8 +67,7 @@ class ApiTransactionControllerTest extends TestCase
         $receiverUser = User::factory()->create();
         $this->actingAs($senderUser, 'api');
 
-        $this->json('POST', 'api/send-money', ['receiver_id' => $receiverUser->id, 'amount' => 5])
-            ->assertStatus(401);
+        $this->json('POST', 'api/send-money', ['receiver_id' => $receiverUser->id, 'amount' => 5])->assertUnauthorized();
     }
 
     public function test_send_money_successful_for_same_currency_sender_receiver()
@@ -88,7 +77,7 @@ class ApiTransactionControllerTest extends TestCase
         $this->actingAs($senderUser, 'api');
 
         $this->json('POST', 'api/send-money', ['receiver_id' => $receiverUser->id, 'amount' => 5])
-            ->assertStatus(200)
+            ->assertStatus(201)
             ->assertJsonPath('data.sender_user_id', $senderUser->id)
             ->assertJsonPath('data.sender_currency', $senderUser->currency)
             ->assertJsonPath('data.sending_amount', 5)
@@ -110,7 +99,7 @@ class ApiTransactionControllerTest extends TestCase
         $this->actingAs($senderUser, 'api');
 
         $response = $this->json('POST', 'api/send-money', ['receiver_id' => $receiverUser->id, 'amount' => 5])
-            ->assertStatus(200)
+            ->assertStatus(201)
             ->assertJsonPath('data.sender_user_id', $senderUser->id)
             ->assertJsonPath('data.sender_currency', $senderUser->currency)
             ->assertJsonPath('data.sending_amount', 5)
@@ -124,9 +113,9 @@ class ApiTransactionControllerTest extends TestCase
         $this->assertEquals(20+$response->json()['data']['receiving_amount'], $receiverWallet);
     }
 
-    public function test_user_transaction_info_must_be_for_authenticated_user()
+    public function test_user_transaction_info_must_be_for_authorized_user()
     {
-        $this->json('GET', 'api/user-transaction-info')->assertStatus(401);
+        $this->json('GET', 'api/user-transaction-info')->assertUnauthorized();
     }
 
     public function test_user_transaction_info_return_valid_result()
@@ -187,16 +176,16 @@ class ApiTransactionControllerTest extends TestCase
         $thirdHighestTransaction = 30;
 
         $this->json('GET', 'api/user-transaction-info')
-            ->assertStatus(200)
+            ->assertOk()
             ->assertJsonPath('data.converted_amount_by_sending', $sendingConvertedAmount)
             ->assertJsonPath('data.converted_amount_by_receiving', $receivingConvertedAmount)
             ->assertJsonPath('data.total_converted_amount', $sendingConvertedAmount+$receivingConvertedAmount)
             ->assertJsonPath('data.third_highest_transaction_amount', $thirdHighestTransaction);
     }
 
-    public function test_user_transaction_history_must_be_for_authenticated_user()
+    public function test_user_transaction_history_must_be_for_authorized_user()
     {
-        $this->json('GET', 'api/user-transaction-history')->assertStatus(401);
+        $this->json('GET', 'api/user-transaction-history')->assertUnauthorized();
     }
 
     public function test_user_transaction_history_return_valid_result()
@@ -213,12 +202,12 @@ class ApiTransactionControllerTest extends TestCase
             'receiver_currency' => $user2->currency,
         ]);
 
-        $response = $this->json('GET', 'api/user-transaction-history')->assertStatus(200);
+        $response = $this->json('GET', 'api/user-transaction-history')->assertOk();
 
         $transactionData = $transaction->toArray();
         $transactionData['senderName'] = $user1->name;
         $transactionData['receiverName'] = $user2->name;
 
-        $this->assertEquals($transactionData, $response->json()['data']['data'][0]);
+        $this->assertEquals($transactionData, $response->json()['data'][0]);
     }
 }
