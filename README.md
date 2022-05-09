@@ -13,7 +13,7 @@ The task is developed by Laravel 9. Laravel Repository Pattern is used for devel
 - Transaction info for a particular user
 - All Transaction History
 
-##### Restfull API list
+##### Restful API list
 - POST login (Parameters: email, password)
 - Authenticated APIs:
   - GET user-profile
@@ -45,3 +45,11 @@ There are two registered users with a single currency based wallet. User A has a
 - Project run `php artisan serve`
 - Project test `php artisan test`
 
+## Postman API Testing
+
+You can test APIs by the following Postman Collection. Just imposrt and set variables:
+- url: API base url
+- token: Generate token by login request
+``
+https://www.getpostman.com/collections/f3c8b4d9fa32400d7304
+``
