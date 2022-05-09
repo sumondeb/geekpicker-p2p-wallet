@@ -47,9 +47,9 @@ There are two registered users with a single currency based wallet. User A has a
 
 ## Postman API Testing
 
-You can test APIs by the following Postman Collection. Just imposrt and set variables:
+You can test APIs by the following Postman Collection. Just import and set variables:
 - url: API base url
 - token: Generate token by login request
-``
+```
 https://www.getpostman.com/collections/f3c8b4d9fa32400d7304
-``
+```
